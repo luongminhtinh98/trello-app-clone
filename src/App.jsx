@@ -1,64 +1,78 @@
-
-
-import './App.css'
-import { Header } from 'antd/es/layout/layout'
-import { Layout, Card, Col, Row, Tooltip, Button, Space } from 'antd'
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-
-// assets
-import logoTrello from './assets/logo-trello.png'
+import "./App.css";
+import HeaderComponent from "./components/Header";
+import CardList from "./components/CardList";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
+import { useCallback } from "react";
+import { dataSource } from "./mocks/data";
 
 function App() {
+  // using useCallback is optional
+  const onBeforeCapture = useCallback(() => {
+    /*...*/
+  }, []);
+  const onBeforeDragStart = useCallback(() => {
+    /*...*/
+  }, []);
+  const onDragStart = useCallback(() => {
+    /*...*/
+  }, []);
+  const onDragUpdate = useCallback(() => {
+    /*...*/
+  }, []);
+  const onDragEnd = useCallback(() => {
+    // the only one that is required
+  }, []);
 
   return (
     <>
-      <Layout>
-        <Header
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#1677ff',
-            height: '40px'
-          }}
-        >
-          <img src={logoTrello} alt='logo trello' height={80} width={80}></img>
-        </Header>
-      </Layout>
+      <HeaderComponent />
       <main>
-        <Row gutter={16}>
-          <Col span={8}>
-            <Card 
-              title="Card title" 
-              bordered={false} 
-              extra={
-                <Space gutter={2}>
-                  <Tooltip title="add">
-                    <Button shape="circle" icon={<PlusOutlined />} />
-                  </Tooltip>
+        <div className="trello-container">
+          <DragDropContext
+            onBeforeCapture={onBeforeCapture}
+            onBeforeDragStart={onBeforeDragStart}
+            onDragStart={onDragStart}
+            onDragUpdate={onDragUpdate}
+            onDragEnd={onDragEnd}
+          >
+            <Droppable
+              droppableId="CARD_LIST"
+              direction="horizontal"
+              type="CARD_LIST"
+            >
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  // style={{
+                  //   backgroundColor: snapshot.isDraggingOver ? "blue" : "grey",
+                  // }}
+                  {...provided.droppableProps}
+                  className="list-container"
+                >
+                  {dataSource.columns.map((list, listIndex) => {
+                    const cardList = dataSource.lists[list];
+                    const cards = cardList.cards;
 
-                  <Tooltip title="delete">
-                    <Button shape="circle" icon={<DeleteOutlined />} />
-                  </Tooltip>
-                </Space>
-              }>
-              Card content
-            </Card>
-          </Col>
-          <Col span={8}>
-            <Card title="Card title" bordered={false}>
-              Card content
-            </Card>
-          </Col>
-          <Col span={8}>
-            <Card title="Card title" bordered={false}>
-              Card content
-            </Card>
-          </Col>
-        </Row>
+                    return (
+                      <CardList
+                        key={cardList.id}
+                        draggableId={list}
+                        index={listIndex}
+                        cardList={cardList}
+                        cards={cards}
+                      /> 
+                    );
+                  })}
+
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </div>
       </main>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
